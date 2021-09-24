@@ -24,17 +24,18 @@ public class IntegrationConfig {
     }
 
     @Bean
-    public IntegrationFlow myFlow(MessageChannel queueChannel,MessageChannel testChannel) {
+    public IntegrationFlow myFlow(MessageChannel queueChannel, MessageChannel testChannel) {
         return IntegrationFlows.fromSupplier(integerSource()::getAndIncrement, c -> c.poller(Pollers.fixedRate(500)))
                 .filter((Integer p) -> p > 0)
                 .transform(Object::toString)
                 .channel(queueChannel)
+                .wireTap("messageFunction")
                 .channel(testChannel)
                 .get();
     }
 
 
-   @Bean
+    @Bean
     public IntegrationFlow myChannel() {
         return f -> f.transform(getToUpperCase())
                 .channel("inputChannel")
@@ -62,6 +63,7 @@ public class IntegrationConfig {
     public MessageChannel queueChannel() {
         return new DirectChannel();
     }
+
     @Bean
     public MessageChannel testChannel() {
         return new DirectChannel();
