@@ -1,28 +1,39 @@
-package com.deploysoft.integration;
+package com.deploysoft.cloud;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
-import org.springframework.integration.dsl.IntegrationFlow;
-import org.springframework.integration.dsl.IntegrationFlows;
-import org.springframework.integration.handler.LoggingHandler;
-import org.springframework.messaging.Message;
+import reactor.core.publisher.Flux;
 
 import java.util.function.Function;
 
+@Slf4j
 @SpringBootApplication
-public class IntegrationApplication {
+public class SpringCloudApplication {
 
     @Bean
-    Function<String, String> reverse() {
-        return s -> new StringBuilder(s).reverse().toString();
+    public Function<String, String> uppercase() {
+        log.info("uppercase from spring function...");
+        return String::toUpperCase;
+    }
+
+    @Bean
+    public Function<String, String> reverse() {
+        log.info("reversing from spring function...");
+        return message -> new StringBuilder(message).reverse().toString();
+    }
+
+    @Bean
+    public Function<Flux<String>, Flux<String>> reverseReactive() {
+        return flux -> flux.map(String::toUpperCase);
     }
 
     public static void main(String[] args) {
-        SpringApplication.run(IntegrationApplication.class, args);
+        SpringApplication.run(SpringCloudApplication.class, args);
     }
 
-    @Bean
+/*    @Bean
     public IntegrationFlow uppercaseFlow() {
         return IntegrationFlows.from(MessageFunction.class, (gateway) -> gateway.beanName("uppercase"))
                 .<String, String>transform(String::toUpperCase)
@@ -31,7 +42,7 @@ public class IntegrationApplication {
 
     public interface MessageFunction extends Function<Message<String>, Message<String>> {
 
-    }
+    }*/
 
 
 
