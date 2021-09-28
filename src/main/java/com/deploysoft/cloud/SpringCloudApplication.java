@@ -14,14 +14,18 @@ public class SpringCloudApplication {
 
     @Bean
     public Function<String, String> uppercase() {
-        log.info("uppercase from spring function...");
-        return String::toUpperCase;
+        return  s -> {
+            log.info("uppercase from spring function...");
+            return s.toUpperCase();
+        };
     }
 
     @Bean
     public Function<String, String> reverse() {
-        log.info("reversing from spring function...");
-        return message -> new StringBuilder(message).reverse().toString();
+        return message -> {
+            log.info("reversing from spring function...");
+            return new StringBuilder(message).reverse().toString();
+        };
     }
 
     @Bean
