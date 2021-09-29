@@ -1,6 +1,8 @@
 package com.deploysoft.cloud;
 
+import com.deploysoft.cloud.gateway.Producer;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
@@ -14,7 +16,7 @@ public class SpringCloudApplication {
 
     @Bean
     public Function<String, String> uppercase() {
-        return  s -> {
+        return s -> {
             log.info("uppercase from spring function...");
             return s.toUpperCase();
         };
@@ -37,5 +39,11 @@ public class SpringCloudApplication {
         SpringApplication.run(SpringCloudApplication.class, args);
     }
 
-
+    @Bean
+    CommandLineRunner runner(Producer producer) {
+        return args -> {
+            String mymessage = producer.produceAndConsume("message");
+            System.out.println(mymessage);
+        };
+    }
 }
