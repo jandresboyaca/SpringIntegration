@@ -37,24 +37,5 @@ public class SpringCloudApplication {
         SpringApplication.run(SpringCloudApplication.class, args);
     }
 
-/*    @Bean
-    public IntegrationFlow uppercaseFlow() {
-        return IntegrationFlows.from(MessageFunction.class, (gateway) -> gateway.beanName("uppercase"))
-                .<String, String>transform(String::toUpperCase)
-                .logAndReply(LoggingHandler.Level.WARN);
-    }
-
-    public interface MessageFunction extends Function<Message<String>, Message<String>> {
-
-    }*/
-
-
-
-
-  /*  @Bean
-    CommandLineRunner runner(Action action) {
-        return args -> action.sendToMyChannel("prueba");
-    }*/
-
 
 }
