@@ -43,6 +43,8 @@ public class SpringCloudApplication {
     CommandLineRunner runner(Producer producer) {
         return args -> {
             String mymessage = producer.produceAndConsume("message");
+            String message = producer.produceAndConsume(1);
+            System.out.println(message);
             System.out.println(mymessage);
         };
     }

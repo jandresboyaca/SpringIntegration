@@ -11,4 +11,7 @@ public interface Producer {
     @Gateway(requestChannel = "convert.input")
     String produceAndConsume(String message);
 
+    @Gateway(requestChannel = "parallelSplitRouteAggregateFlow.input")
+    String produceAndConsume(Integer number);
+
 }
