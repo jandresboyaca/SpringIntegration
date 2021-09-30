@@ -1,5 +1,6 @@
 package com.deploysoft.cloud;
 
+import com.deploysoft.cloud.domain.Message;
 import com.deploysoft.cloud.gateway.Producer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
@@ -43,7 +44,10 @@ public class SpringCloudApplication {
     CommandLineRunner runner(Producer producer) {
         return args -> {
             String mymessage = producer.produceAndConsume("message");
-            String message = producer.produceAndConsume(1);
+            String message = producer.produceAndConsume(new Message());
+            String queueMessage = producer.queueChannel(new Message());
+
+            System.out.println(queueMessage);
             System.out.println(message);
             System.out.println(mymessage);
         };

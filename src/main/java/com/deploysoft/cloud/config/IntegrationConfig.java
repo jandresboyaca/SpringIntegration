@@ -5,7 +5,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.integration.config.EnableIntegration;
 import org.springframework.integration.dsl.BaseIntegrationFlowDefinition;
 import org.springframework.integration.dsl.IntegrationFlow;
+import org.springframework.integration.dsl.IntegrationFlows;
 import org.springframework.integration.dsl.MessageChannels;
+import org.springframework.messaging.MessageChannel;
 
 import java.util.Arrays;
 import java.util.concurrent.Executors;
@@ -47,6 +49,20 @@ public class IntegrationConfig {
     @Bean
     public IntegrationFlow agg() {
         return BaseIntegrationFlowDefinition::aggregate;
+        //return f -> f.aggregate();
+    }
+
+
+    @Bean
+    public IntegrationFlow queueFlow(MessageChannel queueChannel) {
+        return IntegrationFlows.from(queueChannel)
+                .handle((p, h) -> Arrays.asList(1, 2, 3))
+                .split()
+                .channel(MessageChannels.executor(Executors.newCachedThreadPool()))
+                .<Integer, Boolean>route(o -> o % 2 == 0, m -> m
+                        .subFlowMapping(true, oddFlow())
+                        .subFlowMapping(false, evenFlow()))
+                .get();
     }
 
 }

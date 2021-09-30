@@ -1,5 +1,6 @@
 package com.deploysoft.cloud.gateway;
 
+import com.deploysoft.cloud.domain.Message;
 import org.springframework.integration.annotation.Gateway;
 import org.springframework.integration.annotation.MessagingGateway;
 import org.springframework.stereotype.Service;
@@ -12,6 +13,9 @@ public interface Producer {
     String produceAndConsume(String message);
 
     @Gateway(requestChannel = "parallelSplitRouteAggregateFlow.input")
-    String produceAndConsume(Integer number);
+    String produceAndConsume(Message message);
 
+
+    @Gateway(requestChannel = "queueChannel")
+    String queueChannel(Message message);
 }
