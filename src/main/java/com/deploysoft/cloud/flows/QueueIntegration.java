@@ -10,6 +10,7 @@ import org.springframework.integration.dsl.IntegrationFlows;
 import org.springframework.integration.dsl.MessageChannels;
 import org.springframework.messaging.MessageChannel;
 
+import java.util.Arrays;
 import java.util.concurrent.Executors;
 
 @Configuration
@@ -24,12 +25,12 @@ public class QueueIntegration {
 
     @Bean
     public IntegrationFlow aFlow() {
-        return flow -> flow.<Message>handle((payload, headers) -> "correct value").log();
+        return flow -> flow.<Message>handle((payload, headers) -> "correct value").log().channel("agg.input");
     }
 
     @Bean
     public IntegrationFlow bFlow() {
-        return flow -> flow.<Message>handle((payload, headers) -> "invalid value").log();
+        return flow -> flow.<Message>handle((payload, headers) -> "invalid value").log().channel("agg.input");
     }
 
     @Bean
@@ -42,9 +43,10 @@ public class QueueIntegration {
     @Bean
     public IntegrationFlow queueFlow(MessageChannel queueChannel, TransformerService service) {
         return IntegrationFlows.from(queueChannel)
-                .transform(service::transform)
+                //.transform(service::transform)
+                .handle((p, h) -> Arrays.asList(Message.builder().message("a").build(), Message.builder().message("b").build()))
                 .split()
-                //.channel(MessageChannels.executor(Executors.newCachedThreadPool())) //handle with multi thread by default is a Thread Scheduler
+                .channel(MessageChannels.executor(Executors.newCachedThreadPool())) //handle with multi thread by default is a Thread Scheduler
                 .<Message, Boolean>route(message -> message.getMessage().equals("MESSAGE"),
                         r -> r
                                 .subFlowMapping(true, aFlow())
@@ -52,6 +54,20 @@ public class QueueIntegration {
                 ).get();
 
     }
+
+/*
+    @Bean
+    public IntegrationFlow queueFlowWithMultipleChannels(MessageChannel queueChannel, TransformerService service) {
+        return IntegrationFlows.from(queueChannel)
+                .split()
+                .channel(MessageChannels.executor(Executors.newCachedThreadPool()))
+                .routeToRecipients(r -> r
+                        .recipientFlow(aFlow())
+                        .recipientFlow(bFlow())
+                        .defaultOutputToParentFlow())
+                .get();
+    }
+*/
 
 }
 

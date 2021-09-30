@@ -21,9 +21,7 @@ public class SpringCloudApplication {
     @Bean
     CommandLineRunner runner(Producer producer) {
         return args -> {
-            Message message = new Message();
-            message.setMessage("message");
-            String queueMessage = producer.queueChannel(message);
+            String queueMessage = producer.queueChannel(Message.builder().message("a").build());
             log.info("Response from flow [{}]", queueMessage);
         };
     }
