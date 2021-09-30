@@ -7,8 +7,10 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.integration.config.EnableIntegration;
 
 @Slf4j
+@EnableIntegration
 @SpringBootApplication
 public class SpringCloudApplication {
 
@@ -19,12 +21,10 @@ public class SpringCloudApplication {
     @Bean
     CommandLineRunner runner(Producer producer) {
         return args -> {
-            String mymessage = producer.produceAndConsume("message");
-            String message = producer.produceAndConsume(new Message());
-            String queueMessage = producer.queueChannel(new Message());
-            log.info(queueMessage);
-            log.info(message);
-            log.info(mymessage);
+            Message message = new Message();
+            message.setMessage("message");
+            String queueMessage = producer.queueChannel(message);
+            log.info("Response from flow [{}]", queueMessage);
         };
     }
 }
