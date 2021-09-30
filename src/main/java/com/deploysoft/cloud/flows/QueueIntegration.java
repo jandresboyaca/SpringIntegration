@@ -7,7 +7,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.integration.dsl.BaseIntegrationFlowDefinition;
 import org.springframework.integration.dsl.IntegrationFlow;
 import org.springframework.integration.dsl.IntegrationFlows;
+import org.springframework.integration.dsl.MessageChannels;
 import org.springframework.messaging.MessageChannel;
+
+import java.util.concurrent.Executors;
 
 @Configuration
 public class QueueIntegration {
@@ -21,12 +24,12 @@ public class QueueIntegration {
 
     @Bean
     public IntegrationFlow aFlow() {
-        return flow -> flow.<Message>handle((payload, headers) -> "correct value");
+        return flow -> flow.<Message>handle((payload, headers) -> "correct value").log();
     }
 
     @Bean
     public IntegrationFlow bFlow() {
-        return flow -> flow.<Message>handle((payload, headers) -> "invalid value");
+        return flow -> flow.<Message>handle((payload, headers) -> "invalid value").log();
     }
 
     @Bean
@@ -41,7 +44,7 @@ public class QueueIntegration {
         return IntegrationFlows.from(queueChannel)
                 .transform(service::transform)
                 .split()
-                //.channel(MessageChannels.executor(Executors.newCachedThreadPool())) handle with multi thread
+                //.channel(MessageChannels.executor(Executors.newCachedThreadPool())) //handle with multi thread by default is a Thread Scheduler
                 .<Message, Boolean>route(message -> message.getMessage().equals("MESSAGE"),
                         r -> r
                                 .subFlowMapping(true, aFlow())
