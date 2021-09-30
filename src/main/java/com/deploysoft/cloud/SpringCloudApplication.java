@@ -7,7 +7,6 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
-import reactor.core.publisher.Flux;
 
 import java.util.function.Function;
 
@@ -29,11 +28,6 @@ public class SpringCloudApplication {
             log.info("reversing from spring function...");
             return new StringBuilder(message).reverse().toString();
         };
-    }
-
-    @Bean
-    public Function<Flux<String>, Flux<String>> reverseReactive() {
-        return flux -> flux.map(String::toUpperCase);
     }
 
     public static void main(String[] args) {
