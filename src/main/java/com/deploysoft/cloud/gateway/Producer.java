@@ -9,9 +9,10 @@ import org.springframework.stereotype.Service;
 @MessagingGateway
 public interface Producer {
 
-    @Gateway(requestChannel = "convert.input")
-    String produceAndConsume(String message);
 
     @Gateway(requestChannel = "queueChannel")
     String queueChannel(Message message);
+
+    @Gateway(requestChannel = "queueChannel")
+    String testPush(Integer message);
 }
