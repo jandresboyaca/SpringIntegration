@@ -19,10 +19,6 @@ public class MessageChannelConfig {
     public MessageChannel publishSubscribe() {
         return MessageChannels.publishSubscribe(Executors.newCachedThreadPool()).get();
     }
-    @Bean
-    public MessageChannel publishSubscribe2() {
-        return MessageChannels.publishSubscribe(Executors.newCachedThreadPool()).get();
-    }
 
     //TODO
     @Bean

@@ -21,20 +21,11 @@ public class SpringCloudApplication {
     @Bean
     CommandLineRunner runner(Producer producer) {
         return args -> {
-            // String queueMessage = producer.queueChannel(Message.builder().message("a").build());
-            // log.info("Response from flow [{}]", queueMessage);
-
-          /*  long startTime = System.currentTimeMillis();
-            log.warn("Inicio {}", startTime);
-            log.info(producer.queueChannel((Message.builder().message("a").build())));
+            long startTime = System.currentTimeMillis();
+            log.warn("Init {}", startTime);
+            log.info("Response from flow [{}]", producer.queueChannel(2));
             long endTime = System.currentTimeMillis();
-            log.warn("Fin {}", endTime - startTime);*/
-
-            long startTime2 = System.currentTimeMillis();
-            log.warn("Inicio {}", startTime2);
-            log.info("aca" + producer.testPush(2));
-            long endTime2 = System.currentTimeMillis();
-            log.warn("Fin {}", endTime2 - startTime2);
+            log.warn("End {}", endTime - startTime);
         };
     }
 }
