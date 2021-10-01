@@ -18,6 +18,7 @@ public class QueueIntegration {
     @Bean
     public IntegrationFlow aFlow(LogicService service) {
         return IntegrationFlows.from(MessageChannels.executor(Executors.newCachedThreadPool()))
+                .log()
                 .handle(service::callFakeService)
                 .get();
     }
@@ -25,7 +26,9 @@ public class QueueIntegration {
     @Bean
     public IntegrationFlow bFlow(LogicService service) {
         return IntegrationFlows.from(MessageChannels.executor(Executors.newCachedThreadPool()))
-                .handle(service::callFakeService).get();
+                .log()
+                .handle(service::callFakeService)
+                .get();
     }
 
     @Bean
