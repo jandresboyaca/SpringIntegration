@@ -1,5 +1,6 @@
 package com.deploysoft.cloud.service;
 
+import com.deploysoft.cloud.domain.Message;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.stereotype.Service;
@@ -11,13 +12,14 @@ import java.util.concurrent.TimeUnit;
 public class LogicService {
 
 
-    public Integer callFakeService(Integer value, MessageHeaders headers) {
+    public Message callFakeService(Message value, MessageHeaders headers) {
+        log.info("[{}]", headers);
         try {
             TimeUnit.SECONDS.sleep(2);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        return value * 2;
+        return value;
     }
 
 }

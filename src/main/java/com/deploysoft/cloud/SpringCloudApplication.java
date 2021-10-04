@@ -7,6 +7,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.integration.config.EnableIntegration;
 
 @Slf4j
@@ -23,9 +24,15 @@ public class SpringCloudApplication {
         return args -> {
             long startTime = System.currentTimeMillis();
             log.warn("Init {}", startTime);
-            log.info("Response from flow [{}]", producer.queueChannel(2));
+            log.info("Response from flow [{}]", producer.queueChannel(Message.builder().config("test").build()));
             long endTime = System.currentTimeMillis();
             log.warn("End {}", endTime - startTime);
         };
     }
+/*
+    @ServiceActivator(inputChannel = "storeChannel.out")
+    public void test(Message o) {
+        System.out.println(o);
+    }
+*/
 }

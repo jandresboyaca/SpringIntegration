@@ -10,5 +10,5 @@ import org.springframework.stereotype.Service;
 public interface Producer {
 
     @Gateway(requestChannel = "queueChannel")
-    String queueChannel(Integer message);
+    Message queueChannel(Message message);
 }

@@ -1,5 +1,6 @@
 package com.deploysoft.cloud.flows;
 
+import com.deploysoft.cloud.domain.Message;
 import com.deploysoft.cloud.service.LogicService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
@@ -36,8 +37,8 @@ public class QueueIntegration {
         return IntegrationFlows.from(queueChannel)
                 .scatterGather(scatterer -> scatterer
                                 .applySequence(true)
-                                .recipientFlow(aFlow(service))
-                                .recipientFlow(bFlow(service))
+                                .recipientFlow((Message m) -> m.getConfig().equals("test"), aFlow(service))
+                                .recipientFlow((Message m) -> m.getConfig().equals("test"), bFlow(service))
                         ,
                         null
                 ).get();
