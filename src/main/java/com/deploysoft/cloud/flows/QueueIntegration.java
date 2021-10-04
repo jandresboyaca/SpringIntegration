@@ -20,7 +20,11 @@ public class QueueIntegration {
     public IntegrationFlow aFlow(LogicService service) {
         return IntegrationFlows.from(MessageChannels.executor(Executors.newCachedThreadPool()))
                 .log()
-                .handle(service::callFakeService)
+                .handle(service::callFakeServiceTimeout1)
+                .transform((Message.class), message -> {
+                    message.setMessage(message.getMessage().toUpperCase());
+                    return message;
+                })
                 .get();
     }
 
@@ -28,7 +32,11 @@ public class QueueIntegration {
     public IntegrationFlow bFlow(LogicService service) {
         return IntegrationFlows.from(MessageChannels.executor(Executors.newCachedThreadPool()))
                 .log()
-                .handle(service::callFakeService)
+                .handle(service::callFakeServiceTimeout2)
+                .transform((Message.class), message -> {
+                    message.setMessage(message.getMessage().toUpperCase());
+                    return message;
+                })
                 .get();
     }
 

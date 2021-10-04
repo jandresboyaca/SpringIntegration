@@ -12,7 +12,17 @@ import java.util.concurrent.TimeUnit;
 public class LogicService {
 
 
-    public Message callFakeService(Message value, MessageHeaders headers) {
+    public Message callFakeServiceTimeout1(Message value, MessageHeaders headers) {
+        log.info("[{}]", headers);
+        try {
+            TimeUnit.SECONDS.sleep(1);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return value;
+    }
+
+    public Message callFakeServiceTimeout2(Message value, MessageHeaders headers) {
         log.info("[{}]", headers);
         try {
             TimeUnit.SECONDS.sleep(2);

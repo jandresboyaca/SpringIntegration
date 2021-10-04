@@ -24,7 +24,7 @@ public class SpringCloudApplication {
         return args -> {
             long startTime = System.currentTimeMillis();
             log.warn("Init {}", startTime);
-            log.info("Response from flow [{}]", producer.queueChannel(Message.builder().config("test").build()));
+            log.info("Response from flow [{}]", producer.queueChannel(Message.builder().config("test").message("message").build()));
             long endTime = System.currentTimeMillis();
             log.warn("End {}", endTime - startTime);
         };
