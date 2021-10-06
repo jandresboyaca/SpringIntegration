@@ -44,9 +44,8 @@ public class QueueIntegration {
                                 .recipientFlow(aFlow(service))
                                 .recipientFlow(bFlow(service)),
                         gatherer -> gatherer
+                                .groupTimeout(1500L)
                                 .sendPartialResultOnExpiry(true)
-                        , scatterGather -> scatterGather
-                                .gatherTimeout(4000L)
                 );
     }
 
