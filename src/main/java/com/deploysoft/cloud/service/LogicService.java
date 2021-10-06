@@ -1,6 +1,6 @@
 package com.deploysoft.cloud.service;
 
-import com.deploysoft.cloud.domain.Message;
+import com.deploysoft.cloud.domain.MessageDomain;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.stereotype.Service;
@@ -12,24 +12,22 @@ import java.util.concurrent.TimeUnit;
 public class LogicService {
 
 
-    public Message callFakeServiceTimeout1(Message value, MessageHeaders headers) {
-        log.info("[{}]", headers);
-        try {
-            TimeUnit.SECONDS.sleep(1);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        return value;
-    }
-
-    public Message callFakeServiceTimeout2(Message value, MessageHeaders headers) {
-        log.info("[{}]", headers);
+    public MessageDomain callFakeServiceTimeout2(MessageDomain value, MessageHeaders headers) {
         try {
             TimeUnit.SECONDS.sleep(2);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
         return value;
+    }
+
+    public MessageDomain callFakeServiceTimeout4(MessageDomain value, MessageHeaders headers) {
+        try {
+            TimeUnit.SECONDS.sleep(4);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return new MessageDomain("new message", "test");
     }
 
 }

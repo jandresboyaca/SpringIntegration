@@ -1,14 +1,16 @@
 package com.deploysoft.cloud;
 
-import com.deploysoft.cloud.domain.Message;
+import com.deploysoft.cloud.domain.MessageDomain;
 import com.deploysoft.cloud.gateway.Producer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
-import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.integration.config.EnableIntegration;
+
+import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @EnableIntegration
@@ -24,7 +26,10 @@ public class SpringCloudApplication {
         return args -> {
             long startTime = System.currentTimeMillis();
             log.warn("Init {}", startTime);
-            log.info("Response from flow [{}]", producer.queueChannel(Message.builder().config("test").message("message").build()));
+            MessageDomain message = MessageDomain.builder().config("test").message("message").build();
+            Map<String, Object> headers = Map.of("Key", "Value");
+            List<MessageDomain> arg = producer.queueChannel(message, headers);
+            log.info("Response from flow {}", arg);
             long endTime = System.currentTimeMillis();
             log.warn("End {}", endTime - startTime);
         };

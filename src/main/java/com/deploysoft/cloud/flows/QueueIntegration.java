@@ -1,6 +1,6 @@
 package com.deploysoft.cloud.flows;
 
-import com.deploysoft.cloud.domain.Message;
+import com.deploysoft.cloud.domain.MessageDomain;
 import com.deploysoft.cloud.service.LogicService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
@@ -8,7 +8,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.integration.dsl.IntegrationFlow;
 import org.springframework.integration.dsl.IntegrationFlows;
 import org.springframework.integration.dsl.MessageChannels;
-import org.springframework.messaging.MessageChannel;
 
 import java.util.concurrent.Executors;
 
@@ -19,10 +18,9 @@ public class QueueIntegration {
     @Bean
     public IntegrationFlow aFlow(LogicService service) {
         return IntegrationFlows.from(MessageChannels.executor(Executors.newCachedThreadPool()))
-                .log()
-                .handle(service::callFakeServiceTimeout1)
-                .transform((Message.class), message -> {
-                    message.setMessage(message.getMessage().toUpperCase());
+                .handle(service::callFakeServiceTimeout2)
+                .transform((MessageDomain.class), message -> {
+                    message.setMessage(new StringBuilder(message.getMessage()).reverse().toString());
                     return message;
                 })
                 .get();
@@ -31,25 +29,25 @@ public class QueueIntegration {
     @Bean
     public IntegrationFlow bFlow(LogicService service) {
         return IntegrationFlows.from(MessageChannels.executor(Executors.newCachedThreadPool()))
-                .log()
-                .handle(service::callFakeServiceTimeout2)
-                .transform((Message.class), message -> {
+                .handle(service::callFakeServiceTimeout4)
+                .transform((MessageDomain.class), message -> {
                     message.setMessage(message.getMessage().toUpperCase());
                     return message;
-                })
-                .get();
+                }).get();
     }
 
     @Bean
-    public IntegrationFlow queueFlow(MessageChannel queueChannel, LogicService service) {
-        return IntegrationFlows.from(queueChannel)
+    public IntegrationFlow queueFlow(LogicService service) {
+        return f -> f
                 .scatterGather(scatterer -> scatterer
                                 .applySequence(true)
-                                .recipientFlow((Message m) -> m.getConfig().equals("test"), aFlow(service))
-                                .recipientFlow((Message m) -> m.getConfig().equals("test"), bFlow(service))
-                        ,
-                        null
-                ).get();
+                                .recipientFlow(aFlow(service))
+                                .recipientFlow(bFlow(service)),
+                        gatherer -> gatherer
+                                .sendPartialResultOnExpiry(true)
+                        , scatterGather -> scatterGather
+                                .gatherTimeout(4000L)
+                );
     }
 
   /*  @Bean

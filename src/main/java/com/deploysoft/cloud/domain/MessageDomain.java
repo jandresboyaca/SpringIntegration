@@ -7,7 +7,7 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 @Builder
-public class Message {
+public class MessageDomain {
 
     private String message;
     private String config;
