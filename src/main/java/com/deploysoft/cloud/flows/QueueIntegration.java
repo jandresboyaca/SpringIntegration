@@ -8,8 +8,14 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.integration.dsl.IntegrationFlow;
 import org.springframework.integration.dsl.IntegrationFlows;
 import org.springframework.integration.dsl.MessageChannels;
+import org.springframework.integration.store.MessageGroupStoreReaper;
+import org.springframework.integration.store.SimpleMessageStore;
+import org.springframework.scheduling.TaskScheduler;
+import org.springframework.scheduling.concurrent.ConcurrentTaskScheduler;
+import org.springframework.scheduling.support.PeriodicTrigger;
 
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Configuration
@@ -37,18 +43,49 @@ public class QueueIntegration {
     }
 
     @Bean
-    public IntegrationFlow queueFlow(LogicService service) {
+    public IntegrationFlow cFlow(LogicService service) {
+        return IntegrationFlows.from(MessageChannels.executor(Executors.newCachedThreadPool()))
+                .handle(service::callFakeServiceTimeout6)
+                .transform((MessageDomain.class), message -> {
+                    message.setMessage(message.getMessage().concat("test"));
+                    return message;
+                }).get();
+    }
+
+    @Bean
+    public IntegrationFlow queueFlow(LogicService service, SimpleMessageStore messageStore, TaskScheduler taskSchedulerTest) {
         return f -> f
                 .scatterGather(scatterer -> scatterer
                                 .applySequence(true)
                                 .recipientFlow(aFlow(service))
-                                .recipientFlow(bFlow(service)),
-                        gatherer -> gatherer
-                                .groupTimeout(1500L)
+                                .recipientFlow(bFlow(service))
+                                .recipientFlow(cFlow(service))
+                        , gatherer -> gatherer
+                                .taskScheduler(taskSchedulerTest)
+                                .messageStore(messageStore)
                                 .sendPartialResultOnExpiry(true)
                 );
     }
 
+    @Bean
+    public MessageGroupStoreReaper reaper(SimpleMessageStore messageStore) {
+        MessageGroupStoreReaper messageGroupStoreReaper = new MessageGroupStoreReaper();
+        messageGroupStoreReaper.setTimeout(2000L);
+        messageGroupStoreReaper.setMessageGroupStore(messageStore);
+        return messageGroupStoreReaper;
+    }
+
+    @Bean
+    public SimpleMessageStore messageStore() {
+        return new SimpleMessageStore();
+    }
+
+    @Bean
+    public TaskScheduler taskSchedulerTest(MessageGroupStoreReaper reaper) {
+        ConcurrentTaskScheduler threadPoolTaskScheduler = new ConcurrentTaskScheduler();
+        threadPoolTaskScheduler.schedule(reaper, new PeriodicTrigger(1, TimeUnit.SECONDS));
+        return threadPoolTaskScheduler;
+    }
   /*  @Bean
     IntegrationFlow flow() throws Exception {
         return IntegrationFlows.from("inputChannel-scatter")

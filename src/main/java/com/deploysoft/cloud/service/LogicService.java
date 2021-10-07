@@ -30,4 +30,13 @@ public class LogicService {
         return new MessageDomain("new message", "test");
     }
 
+    public MessageDomain callFakeServiceTimeout6(MessageDomain value, MessageHeaders headers) {
+        try {
+            TimeUnit.SECONDS.sleep(6);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return new MessageDomain("new message", "test");
+    }
+
 }
