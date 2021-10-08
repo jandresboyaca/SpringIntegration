@@ -27,7 +27,7 @@ public class SpringCloudApplication {
             long startTime = System.currentTimeMillis();
             log.warn("Init {}", startTime);
             MessageDomain message = MessageDomain.builder().config("test").message("message").build();
-            Map<String, Object> headers = Map.of("Key", "Value");
+            Map<String, Object> headers = Map.of("InitialTime", System.currentTimeMillis());
             List<MessageDomain> arg = producer.queueChannel(message, headers);
             log.info("Response from flow {}", arg);
             long endTime = System.currentTimeMillis();

@@ -91,6 +91,7 @@ public class QueueIntegration {
                                 .recipientFlow(cFlow(service))
                         , gatherer -> gatherer
                                 .messageStore(messageStore)
+                                .expireGroupsUponTimeout(false)
                                 .sendPartialResultOnExpiry(true)
                 );
     }
