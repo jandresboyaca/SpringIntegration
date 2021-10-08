@@ -12,27 +12,27 @@ import java.util.concurrent.TimeUnit;
 public class LogicService {
 
 
-    public MessageDomain callFakeServiceTimeout2(MessageDomain value, MessageHeaders headers) {
+    public MessageDomain callFakeServiceTimeout10(MessageDomain value, MessageHeaders headers) {
         try {
-            TimeUnit.SECONDS.sleep(2);
+            TimeUnit.SECONDS.sleep(10);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
         return value;
     }
 
-    public MessageDomain callFakeServiceTimeout4(MessageDomain value, MessageHeaders headers) {
+    public MessageDomain callFakeServiceTimeout20(MessageDomain value, MessageHeaders headers) {
         try {
-            TimeUnit.SECONDS.sleep(4);
+            TimeUnit.SECONDS.sleep(20);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
         return new MessageDomain("new message", "test");
     }
 
-    public MessageDomain callFakeServiceTimeout6(MessageDomain value, MessageHeaders headers) {
+    public MessageDomain callFakeServiceTimeout30(MessageDomain value, MessageHeaders headers) {
         try {
-            TimeUnit.SECONDS.sleep(6);
+            TimeUnit.SECONDS.sleep(30);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

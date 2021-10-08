@@ -24,7 +24,7 @@ public class QueueIntegration {
     @Bean
     public IntegrationFlow aFlow(LogicService service) {
         return IntegrationFlows.from(MessageChannels.executor(Executors.newCachedThreadPool()))
-                .handle(service::callFakeServiceTimeout2)
+                .handle(service::callFakeServiceTimeout10)
                 .transform((MessageDomain.class), message -> {
                     message.setMessage(new StringBuilder(message.getMessage()).reverse().toString());
                     return message;
@@ -35,7 +35,7 @@ public class QueueIntegration {
     @Bean
     public IntegrationFlow bFlow(LogicService service) {
         return IntegrationFlows.from(MessageChannels.executor(Executors.newCachedThreadPool()))
-                .handle(service::callFakeServiceTimeout4)
+                .handle(service::callFakeServiceTimeout20)
                 .transform((MessageDomain.class), message -> {
                     message.setMessage(message.getMessage().toUpperCase());
                     return message;
@@ -45,7 +45,7 @@ public class QueueIntegration {
     @Bean
     public IntegrationFlow cFlow(LogicService service) {
         return IntegrationFlows.from(MessageChannels.executor(Executors.newCachedThreadPool()))
-                .handle(service::callFakeServiceTimeout6)
+                .handle(service::callFakeServiceTimeout30)
                 .transform((MessageDomain.class), message -> {
                     message.setMessage(message.getMessage().concat("test"));
                     return message;
@@ -53,7 +53,7 @@ public class QueueIntegration {
     }
 
     @Bean
-    public IntegrationFlow queueFlow(LogicService service, SimpleMessageStore messageStore, TaskScheduler taskSchedulerTest) {
+    public IntegrationFlow queueFlow(LogicService service, SimpleMessageStore messageStore) {
         return f -> f
                 .scatterGather(scatterer -> scatterer
                                 .applySequence(true)
@@ -61,7 +61,6 @@ public class QueueIntegration {
                                 .recipientFlow(bFlow(service))
                                 .recipientFlow(cFlow(service))
                         , gatherer -> gatherer
-                                .taskScheduler(taskSchedulerTest)
                                 .messageStore(messageStore)
                                 .sendPartialResultOnExpiry(true)
                 );
@@ -70,7 +69,7 @@ public class QueueIntegration {
     @Bean
     public MessageGroupStoreReaper reaper(SimpleMessageStore messageStore) {
         MessageGroupStoreReaper messageGroupStoreReaper = new MessageGroupStoreReaper();
-        messageGroupStoreReaper.setTimeout(2000L);
+        messageGroupStoreReaper.setTimeout(TimeUnit.SECONDS.toMillis(15));
         messageGroupStoreReaper.setMessageGroupStore(messageStore);
         return messageGroupStoreReaper;
     }
@@ -86,22 +85,6 @@ public class QueueIntegration {
         threadPoolTaskScheduler.schedule(reaper, new PeriodicTrigger(1, TimeUnit.SECONDS));
         return threadPoolTaskScheduler;
     }
-  /*  @Bean
-    IntegrationFlow flow() throws Exception {
-        return IntegrationFlows.from("inputChannel-scatter")
-                .publishSubscribeChannel(s -> s.applySequence(true)
-                        .subscribe(f -> f
-                                .handle(Http.outboundGateway("http://provider1.com/...")
-                                        .httpMethod(HttpMethod.GET)
-                                        .expectedResponseType(Message[].class))
-                                .channel("inputChannel-gather"))
-                        .subscribe(f -> f
-                                .handle(Http.outboundGateway("http://provider2.com/...")
-                                        .httpMethod(HttpMethod.GET)
-                                        .expectedResponseType(Message[].class))
-                                .channel("inputChannel-gather")))
-                .get();
-    }*/
 
 }
 

@@ -8,14 +8,12 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.integration.config.EnableIntegration;
-import org.springframework.scheduling.annotation.EnableScheduling;
 
 import java.util.List;
 import java.util.Map;
 
 @Slf4j
 @EnableIntegration
-@EnableScheduling
 @SpringBootApplication
 public class SpringCloudApplication {
 
