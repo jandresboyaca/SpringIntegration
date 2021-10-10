@@ -1,5 +1,6 @@
 package com.deploysoft.cloud.flows;
 
+import com.deploysoft.cloud.config.TimeoutReleaseStrategyTest;
 import com.deploysoft.cloud.domain.MessageDomain;
 import com.deploysoft.cloud.service.LogicService;
 import lombok.extern.slf4j.Slf4j;
@@ -24,7 +25,7 @@ public class QueueIntegration {
     @Bean
     public IntegrationFlow aFlow(LogicService service) {
         return IntegrationFlows.from(MessageChannels.executor(Executors.newCachedThreadPool()))
-                .handle(service::callFakeServiceTimeout10)
+                .handle(service::callFakeServiceTimeout5)
                 .transform((MessageDomain.class), message -> {
                     message.setMessage(new StringBuilder(message.getMessage()).reverse().toString());
                     return message;
@@ -35,7 +36,7 @@ public class QueueIntegration {
     @Bean
     public IntegrationFlow bFlow(LogicService service) {
         return IntegrationFlows.from(MessageChannels.executor(Executors.newCachedThreadPool()))
-                .handle(service::callFakeServiceTimeout20)
+                .handle(service::callFakeServiceTimeout5)
                 .transform((MessageDomain.class), message -> {
                     message.setMessage(message.getMessage().toUpperCase());
                     return message;
@@ -45,42 +46,13 @@ public class QueueIntegration {
     @Bean
     public IntegrationFlow cFlow(LogicService service) {
         return IntegrationFlows.from(MessageChannels.executor(Executors.newCachedThreadPool()))
-                .handle(service::callFakeServiceTimeout30)
+                .handle(service::callFakeServiceTimeout15)
                 .transform((MessageDomain.class), message -> {
                     message.setMessage(message.getMessage().concat("test"));
                     return message;
                 }).get();
     }
 
-    /**
-     * Artem I was testing my approach but I think that I don't understand the objective of a reaper. Sry
-     * Follow the documentation
-     *
-     * "You can call the expireMessageGroups method with a timeout value. Any message older than the current time minus this value is expired and has the callbacks applied. Thus, it is the user of the store that defines what is meant by message group “expiry”.""
-     *
-     * But when a run my code (I changed the time for seconds) I have 3 flows each with a delay in seconds
-     *
-     * aFlow -> 10  sec of delay
-     * bFlow -> 20  sec of delay
-     * cFlow -> 30  sec of delay
-     *
-     * I configure the TaskScheduler each second to expired frecuently  the messages with the reaper I use the reaper that sets a time of 15 secods so I expect the next result
-     *
-     * aFlow -> return its message
-     * bFlow -> return its message but is ignored because is over time
-     * cFlow -> return its message but is ignored because is over time
-     *
-     *
-     * But I have the next  result
-     *
-     *
-     * aFlow -> return its message
-     * bFlow -> return its message
-     * cFlow -> return its message but is ignored because is over time
-     * @param service
-     * @param messageStore
-     * @return
-     */
     @Bean
     public IntegrationFlow queueFlow(LogicService service, SimpleMessageStore messageStore) {
         return f -> f
@@ -89,10 +61,12 @@ public class QueueIntegration {
                                 .recipientFlow(aFlow(service))
                                 .recipientFlow(bFlow(service))
                                 .recipientFlow(cFlow(service))
-                        , gatherer -> gatherer
-                                .messageStore(messageStore)
-                                .expireGroupsUponTimeout(false)
-                                .sendPartialResultOnExpiry(true)
+                        , aggregatorSpec ->
+                                aggregatorSpec
+                                        .releaseStrategy(new TimeoutReleaseStrategyTest(5500L))
+                                        .groupTimeout(500L)
+                                        .sendPartialResultOnExpiry(true)
+                     //   , scatterGatherSpec -> scatterGatherSpec.gatherTimeout((2000L))
                 );
     }
 

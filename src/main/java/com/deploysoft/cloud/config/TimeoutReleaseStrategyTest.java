@@ -16,33 +16,21 @@ package com.deploysoft.cloud.config;/*
 
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.integration.aggregator.GroupConditionProvider;
 import org.springframework.integration.aggregator.ReleaseStrategy;
 import org.springframework.integration.store.MessageGroup;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageHeaders;
 
-/**
- * A {@link ReleaseStrategy} that releases all messages if any of the following is true:
- *
- * <ul>
- * <li>The sequence is complete (if there is one).</li>
- * <li>There are more messages than a threshold set by the user.</li>
- * <li>The time elapsed since the earliest message, according to their timestamps, if
- * present, exceeds a timeout set by the user.</li>
- * </ul>
- *
- * @author Dave Syer
- * @author Gary Russell
- * @author Peter Uhlenbruck
- * @since 2.0
- */
+import java.util.function.BiFunction;
+
 @Slf4j
-public class TimeoutReleaseStrategyTest implements ReleaseStrategy {
+public class TimeoutReleaseStrategyTest implements ReleaseStrategy, GroupConditionProvider {
 
     /**
      * Default timeout is one minute.
      */
     public static final long DEFAULT_TIMEOUT = 60 * 1000;
-
 
     private final long timeout;
 
@@ -51,27 +39,33 @@ public class TimeoutReleaseStrategyTest implements ReleaseStrategy {
     }
 
     /**
-     * @param threshold the number of messages to accept before releasing
-     * @param timeout   the timeout for the release in milliseconds
+     * @param timeout the timeout for the release in milliseconds
      */
     public TimeoutReleaseStrategyTest(long timeout) {
         this.timeout = timeout;
     }
 
+    public static final BiFunction<Message<?>, String, String> GROUP_CONDITION =
+            (message, existingCondition) -> {
+                MessageHeaders headers = message.getHeaders();
+                if (headers.get("InitialTime") != null) {
+                    Long initialTime = headers.get("InitialTime", Long.class);
+                    return initialTime != null ? "" + initialTime : existingCondition;
+                }
+                return existingCondition;
+            };
+
     @Override
-    public boolean canRelease(MessageGroup messages) {
-        long elapsedTime = System.currentTimeMillis() - findEarliestTimestamp(messages);
-        log.error("Initial {}, Actual {}, Resultado {} ", findEarliestTimestamp(messages), System.currentTimeMillis(), System.currentTimeMillis() - findEarliestTimestamp(messages));
-        log.error("Evaluation time {}", elapsedTime > this.timeout);
-        return elapsedTime > this.timeout;
+    public boolean canRelease(MessageGroup group) {
+        String condition = group.getCondition();
+        long initialTime = Long.parseLong(condition);
+        log.error("Initial {}, Actual {}, Result {} Timeout {} ", initialTime, System.currentTimeMillis(), System.currentTimeMillis() - initialTime, timeout);
+        log.error("Evaluation time {}", System.currentTimeMillis() - initialTime > this.timeout);
+        return System.currentTimeMillis() - initialTime > this.timeout;
     }
 
-    /**
-     * @param messages the message group
-     * @return the earliest timestamp or Long.MAX_VALUE
-     */
-    private long findEarliestTimestamp(MessageGroup messages) {
-        return (long) messages.getMessages().stream().findFirst().get().getHeaders().get("InitialTime");
+    @Override
+    public BiFunction<Message<?>, String, String> getGroupConditionSupplier() {
+        return GROUP_CONDITION;
     }
-
 }
