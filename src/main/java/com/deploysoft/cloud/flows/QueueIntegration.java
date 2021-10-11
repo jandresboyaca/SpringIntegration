@@ -1,6 +1,6 @@
 package com.deploysoft.cloud.flows;
 
-import com.deploysoft.cloud.config.TimeoutReleaseStrategyTest;
+import com.deploysoft.cloud.config.TimeoutReleaseStrategy;
 import com.deploysoft.cloud.domain.MessageDomain;
 import com.deploysoft.cloud.service.LogicService;
 import lombok.extern.slf4j.Slf4j;
@@ -11,6 +11,7 @@ import org.springframework.integration.dsl.IntegrationFlows;
 import org.springframework.integration.dsl.MessageChannels;
 import org.springframework.integration.store.MessageGroupStoreReaper;
 import org.springframework.integration.store.SimpleMessageStore;
+import org.springframework.messaging.MessageChannel;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ConcurrentTaskScheduler;
 import org.springframework.scheduling.support.PeriodicTrigger;
@@ -29,14 +30,13 @@ public class QueueIntegration {
                 .transform((MessageDomain.class), message -> {
                     message.setMessage(new StringBuilder(message.getMessage()).reverse().toString());
                     return message;
-                })
-                .get();
+                }).get();
     }
 
     @Bean
     public IntegrationFlow bFlow(LogicService service) {
         return IntegrationFlows.from(MessageChannels.executor(Executors.newCachedThreadPool()))
-                .handle(service::callFakeServiceTimeout5)
+                .handle(service::callFakeServiceTimeout10)
                 .transform((MessageDomain.class), message -> {
                     message.setMessage(message.getMessage().toUpperCase());
                     return message;
@@ -46,7 +46,7 @@ public class QueueIntegration {
     @Bean
     public IntegrationFlow cFlow(LogicService service) {
         return IntegrationFlows.from(MessageChannels.executor(Executors.newCachedThreadPool()))
-                .handle(service::callFakeServiceTimeout15)
+                .handle(service::callFakeServiceTimeout20)
                 .transform((MessageDomain.class), message -> {
                     message.setMessage(message.getMessage().concat("test"));
                     return message;
@@ -54,8 +54,8 @@ public class QueueIntegration {
     }
 
     @Bean
-    public IntegrationFlow queueFlow(LogicService service, SimpleMessageStore messageStore) {
-        return f -> f
+    public IntegrationFlow queueFlow(MessageChannel testChannel, LogicService service) {
+        return IntegrationFlows.from(testChannel)
                 .scatterGather(scatterer -> scatterer
                                 .applySequence(true)
                                 .recipientFlow(aFlow(service))
@@ -63,11 +63,11 @@ public class QueueIntegration {
                                 .recipientFlow(cFlow(service))
                         , aggregatorSpec ->
                                 aggregatorSpec
-                                        .releaseStrategy(new TimeoutReleaseStrategyTest(5500L))
-                                        .groupTimeout(500L)
-                                        .sendPartialResultOnExpiry(true)
-                     //   , scatterGatherSpec -> scatterGatherSpec.gatherTimeout((2000L))
-                );
+                                        .releaseStrategy(new TimeoutReleaseStrategy(13500L)) //Release strategy that release that has less than 13.5 sec since the group was created
+                                        .groupTimeout(500L) //Wait 500 milliseconds for other message , call again the release strategy but will be false again because is in the time
+                                        .sendPartialResultOnExpiry(true) // Release messages although they are not complete
+                        , scatterGatherSpec -> scatterGatherSpec.gatherTimeout(15000L) // Not to wait indefinitely because that the release strategy is false by timeout so I have to release the group
+                ).get();
     }
 
     @Bean

@@ -25,7 +25,7 @@ import org.springframework.messaging.MessageHeaders;
 import java.util.function.BiFunction;
 
 @Slf4j
-public class TimeoutReleaseStrategyTest implements ReleaseStrategy, GroupConditionProvider {
+public class TimeoutReleaseStrategy implements ReleaseStrategy, GroupConditionProvider {
 
     /**
      * Default timeout is one minute.
@@ -34,14 +34,14 @@ public class TimeoutReleaseStrategyTest implements ReleaseStrategy, GroupConditi
 
     private final long timeout;
 
-    public TimeoutReleaseStrategyTest() {
+    public TimeoutReleaseStrategy() {
         this(DEFAULT_TIMEOUT);
     }
 
     /**
      * @param timeout the timeout for the release in milliseconds
      */
-    public TimeoutReleaseStrategyTest(long timeout) {
+    public TimeoutReleaseStrategy(long timeout) {
         this.timeout = timeout;
     }
 

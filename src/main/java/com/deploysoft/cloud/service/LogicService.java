@@ -21,7 +21,7 @@ public class LogicService {
         return value;
     }
 
-    public MessageDomain callFakeServiceTimeout20(MessageDomain value, MessageHeaders headers) {
+    public MessageDomain callFakeServiceTimeout10(MessageDomain value, MessageHeaders headers) {
         try {
             TimeUnit.SECONDS.sleep(10);
         } catch (InterruptedException e) {
@@ -30,9 +30,9 @@ public class LogicService {
         return new MessageDomain("new message", "test");
     }
 
-    public MessageDomain callFakeServiceTimeout15(MessageDomain value, MessageHeaders headers) {
+    public MessageDomain callFakeServiceTimeout20(MessageDomain value, MessageHeaders headers) {
         try {
-            TimeUnit.SECONDS.sleep(15);
+            TimeUnit.SECONDS.sleep(20);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
