@@ -13,6 +13,6 @@ import java.util.Map;
 @MessagingGateway
 public interface Producer {
 
-    @Gateway(requestChannel = "testChannel")
+    @Gateway(requestChannel = "directChannel")
     List<MessageDomain> queueChannel(MessageDomain message, @Headers Map<String, Object> map);
 }

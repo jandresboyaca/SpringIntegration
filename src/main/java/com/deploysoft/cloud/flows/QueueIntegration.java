@@ -16,6 +16,7 @@ import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ConcurrentTaskScheduler;
 import org.springframework.scheduling.support.PeriodicTrigger;
 
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
@@ -24,8 +25,14 @@ import java.util.concurrent.TimeUnit;
 public class QueueIntegration {
 
     @Bean
+    public ExecutorService executorService() {
+        //FIXME check Executors.newFixedThreadPool()s
+        return Executors.newCachedThreadPool();
+    }
+
+    @Bean
     public IntegrationFlow aFlow(LogicService service) {
-        return IntegrationFlows.from(MessageChannels.executor(Executors.newCachedThreadPool()))
+        return IntegrationFlows.from(MessageChannels.executor(executorService()))
                 .handle(service::callFakeServiceTimeout5)
                 .transform((MessageDomain.class), message -> {
                     message.setMessage(new StringBuilder(message.getMessage()).reverse().toString());
@@ -35,7 +42,7 @@ public class QueueIntegration {
 
     @Bean
     public IntegrationFlow bFlow(LogicService service) {
-        return IntegrationFlows.from(MessageChannels.executor(Executors.newCachedThreadPool()))
+        return IntegrationFlows.from(MessageChannels.executor(executorService()))
                 .handle(service::callFakeServiceTimeout10)
                 .transform((MessageDomain.class), message -> {
                     message.setMessage(message.getMessage().toUpperCase());
@@ -45,7 +52,7 @@ public class QueueIntegration {
 
     @Bean
     public IntegrationFlow cFlow(LogicService service) {
-        return IntegrationFlows.from(MessageChannels.executor(Executors.newCachedThreadPool()))
+        return IntegrationFlows.from(MessageChannels.executor(executorService()))
                 .handle(service::callFakeServiceTimeout20)
                 .transform((MessageDomain.class), message -> {
                     message.setMessage(message.getMessage().concat("test"));
@@ -66,7 +73,7 @@ public class QueueIntegration {
                                         .releaseStrategy(new TimeoutReleaseStrategy(13500L)) //Release strategy that release that has less than 13.5 sec since the group was created
                                         .groupTimeout(500L) //Wait 500 milliseconds for other message , call again the release strategy but will be false again because is in the time
                                         .sendPartialResultOnExpiry(true) // Release messages although they are not complete
-                        , scatterGatherSpec -> scatterGatherSpec.gatherTimeout(15000L) // Not to wait indefinitely because that the release strategy is false by timeout so I have to release the group
+                        //TODO Compesite Message , Erro Handling
                 ).get();
     }
 

@@ -61,7 +61,7 @@ public class TimeoutReleaseStrategy implements ReleaseStrategy, GroupConditionPr
         long initialTime = Long.parseLong(condition);
         log.error("Initial {}, Actual {}, Result {} Timeout {} ", initialTime, System.currentTimeMillis(), System.currentTimeMillis() - initialTime, timeout);
         log.error("Evaluation time {}", System.currentTimeMillis() - initialTime > this.timeout);
-        return System.currentTimeMillis() - initialTime > this.timeout;
+        return group.isComplete() || group.getMessages().size() >= 3 || System.currentTimeMillis() - initialTime > this.timeout;
     }
 
     @Override

@@ -24,6 +24,7 @@ public class LogicService {
     public MessageDomain callFakeServiceTimeout10(MessageDomain value, MessageHeaders headers) {
         try {
             TimeUnit.SECONDS.sleep(10);
+            //throw new RuntimeException("test");
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
