@@ -1,6 +1,7 @@
 package com.deploysoft.cloud.service;
 
-import com.deploysoft.cloud.domain.MessageDomain;
+import com.deploysoft.cloud.domain.Item;
+import com.deploysoft.cloud.domain.TypeFlowEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.stereotype.Service;
@@ -12,32 +13,32 @@ import java.util.concurrent.TimeUnit;
 public class LogicService {
 
 
-    public MessageDomain callFakeServiceTimeout5(MessageDomain value, MessageHeaders headers) {
+    public String callFakeServiceTimeout5(Item value, MessageHeaders headers) {
         try {
             TimeUnit.SECONDS.sleep(5);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        return value;
+        return TypeFlowEnum.A.name();
     }
 
-    public MessageDomain callFakeServiceTimeout10(MessageDomain value, MessageHeaders headers) {
+    public String callFakeServiceTimeout10(Item value, MessageHeaders headers) {
         try {
             TimeUnit.SECONDS.sleep(10);
             //throw new RuntimeException("test");
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        return new MessageDomain("new message", "test");
+        return TypeFlowEnum.B.name();
     }
 
-    public MessageDomain callFakeServiceTimeout20(MessageDomain value, MessageHeaders headers) {
+    public String callFakeServiceTimeout20(Item value, MessageHeaders headers) {
         try {
             TimeUnit.SECONDS.sleep(20);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        return new MessageDomain("new message", "test");
+        return TypeFlowEnum.C.name();
     }
 
 }
