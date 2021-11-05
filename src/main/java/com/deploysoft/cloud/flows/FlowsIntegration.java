@@ -1,12 +1,12 @@
 package com.deploysoft.cloud.flows;
 
-import com.deploysoft.cloud.domain.Item;
 import com.deploysoft.cloud.service.LogicService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.integration.dsl.IntegrationFlow;
 import org.springframework.integration.dsl.IntegrationFlows;
 import org.springframework.integration.dsl.MessageChannels;
+import org.springframework.integration.handler.LoggingHandler;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -15,13 +15,14 @@ import java.util.concurrent.Executors;
 public class FlowsIntegration {
     @Bean
     public ExecutorService executorService() {
-        //FIXME check Executors.newFixedThreadPool()s
+        //FIXME check Executors.newFixedThreadPool()
         return Executors.newCachedThreadPool();
     }
 
     @Bean
     public IntegrationFlow aFlow(LogicService service) {
         return IntegrationFlows.from(MessageChannels.executor(executorService()))
+                .log(LoggingHandler.Level.WARN)
                 .handle(service::callFakeServiceTimeout5)
                 .transform((String.class), String::toLowerCase).get();
     }

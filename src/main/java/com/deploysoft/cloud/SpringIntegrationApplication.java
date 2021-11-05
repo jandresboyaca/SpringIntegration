@@ -26,8 +26,8 @@ public class SpringIntegrationApplication {
     @Bean
     CommandLineRunner runner(Producer producer) {
         return args -> {
-            scatterGather(producer);
-            //splitter(producer);
+            //scatterGather(producer);
+            splitter(producer);
         };
     }
 
@@ -47,7 +47,8 @@ public class SpringIntegrationApplication {
         log.warn("Init {}", startTime);
         Item message1 = new Item(TypeFlowEnum.A, "", "");
         Item message2 = new Item(TypeFlowEnum.A, "", "");
-        Item message3 = new Item(TypeFlowEnum.C, "", "");
+        Item message3 = new Item(TypeFlowEnum.B, "", "");
+        Item message4 = new Item(TypeFlowEnum.C, "", "");
         Map<String, Object> headers = Map.of("InitialTime", System.currentTimeMillis());
         List<String> arg = producer.splitterChannel(new Order(List.of(message1, message2, message3)), headers);
         log.info("Response from flow {}", arg);
