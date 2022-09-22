@@ -19,4 +19,8 @@ public interface Producer {
 
     @Gateway(requestChannel = "splitterChannel")
     List<String> splitterChannel(Order message, @Headers Map<String, Object> map);
+
+
+    @Gateway(requestChannel = "testChannelExecutor")
+    void executorTest(Order message);
 }

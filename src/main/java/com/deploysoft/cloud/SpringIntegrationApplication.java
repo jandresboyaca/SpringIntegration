@@ -26,8 +26,7 @@ public class SpringIntegrationApplication {
     @Bean
     CommandLineRunner runner(Producer producer) {
         return args -> {
-            //scatterGather(producer);
-            splitter(producer);
+            producer.executorTest(new Order());
         };
     }
 

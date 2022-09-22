@@ -2,11 +2,13 @@ package com.deploysoft.cloud.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.integration.channel.PublishSubscribeChannel;
 import org.springframework.integration.dsl.MessageChannels;
 import org.springframework.integration.scheduling.PollerMetadata;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.scheduling.support.PeriodicTrigger;
 
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 @Configuration
@@ -29,5 +31,11 @@ public class MessageChannelConfig {
         pollerMetadata.setTrigger(periodicTrigger);
         pollerMetadata.setMaxMessagesPerPoll(1);
         return pollerMetadata;
+    }
+
+
+    @Bean("testChannelExecutor")
+    public MessageChannel testChannelExecutor() {
+        return new PublishSubscribeChannel(Executors.newCachedThreadPool());
     }
 }
