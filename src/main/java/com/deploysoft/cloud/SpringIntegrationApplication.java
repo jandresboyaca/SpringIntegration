@@ -26,7 +26,7 @@ public class SpringIntegrationApplication {
     @Bean
     CommandLineRunner runner(Producer producer) {
         return args -> {
-            producer.executorTest(new Order());
+          //  producer.executorTest(new Order());
         };
     }
 
