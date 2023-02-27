@@ -1,9 +1,11 @@
 package com.deploysoft.cloud.flows;
 
 import com.deploysoft.cloud.config.TimeoutReleaseStrategy;
+import com.deploysoft.cloud.domain.Item;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.expression.Expression;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.integration.dsl.IntegrationFlow;
 import org.springframework.integration.dsl.IntegrationFlows;
@@ -11,6 +13,9 @@ import org.springframework.integration.support.MessageBuilder;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessagingException;
+
+import java.util.Objects;
+import java.util.function.Predicate;
 
 @Slf4j
 @Configuration
@@ -28,7 +33,7 @@ public class ScatterGatherIntegration {
                                 aggregatorSpec
                                         .releaseStrategy(new TimeoutReleaseStrategy(13500L)) //Release strategy that release that has less than 13.5 sec since the group was created
                                         .groupTimeout(500L) //Wait 500 milliseconds for other message , call again the release strategy but will be false again because is in the time
-                                        .sendPartialResultOnExpiry(true) // Release messages although they are not complete
+                                        .sendPartialResultOnExpiry(true)// Release messages although they are not complete
                 ).get();
     }
 

@@ -23,4 +23,8 @@ public interface Producer {
 
     @Gateway(requestChannel = "testChannelExecutor")
     void executorTest(Order message);
+
+
+    @Gateway(requestChannel = "routerTest.input")
+    Item testRouter(Item message);
 }
