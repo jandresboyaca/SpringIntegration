@@ -26,10 +26,11 @@ public class SpringIntegrationApplication {
     @Bean
     CommandLineRunner runner(Producer producer) {
         return args -> {
-            Item s = producer.testRouter(new Item(TypeFlowEnum.B,"",""));
-            log.warn("end of flow {}", s);
-            Item s2 = producer.testRouter(new Item(TypeFlowEnum.A,"",""));
-            log.warn("end of flow {}", s2);
+            Item b = producer.testRouter(new Item(TypeFlowEnum.B,"",""));
+            log.warn("end of flow B {}", b);
+
+            Item a = producer.testRouter(new Item(TypeFlowEnum.A,"",""));
+            log.warn("end of flow A {}", a);
         };
     }
 

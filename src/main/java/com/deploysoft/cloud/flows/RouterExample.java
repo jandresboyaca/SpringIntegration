@@ -13,28 +13,34 @@ import org.springframework.integration.handler.LoggingHandler;
 public class RouterExample {
 
     @Bean
-    public IntegrationFlow routerTest(IntegrationFlow subFlow1, IntegrationFlow subFlow2) {
-        return flow -> flow.routeToRecipients(router -> router
-                        .recipientFlow(this::check, subFlow1)
-                        .recipientFlow(this::check, subFlow2)
+    public IntegrationFlow routerTest(IntegrationFlow subFlowA, IntegrationFlow subFlowB) {
+        return flow -> flow
+                .routeToRecipients(router -> router
+                        .recipientFlow(this::checkA, subFlowA)
+                        .recipientFlow(this::checkB, subFlowB)
                         .defaultOutputToParentFlow())
+                .channel("resultOfRouting")
                 .transform(e -> e);
     }
 
-    private boolean check(Item item) {
+    private boolean checkA(Item item) {
         return item.getType().equals(TypeFlowEnum.A);
     }
 
-    @Bean
-    public IntegrationFlow subFlow1() {
-        return f -> f.log(LoggingHandler.Level.WARN).handle(Item.class, (m, p) -> {
-            m.setMessage("subFlow1");
-            return m;
-        });
+    private boolean checkB(Item item) {
+        return item.getType().equals(TypeFlowEnum.B);
     }
 
     @Bean
-    public IntegrationFlow subFlow2() {
+    public IntegrationFlow subFlowA() {
+        return f -> f.log(LoggingHandler.Level.WARN).handle(Item.class, (m, p) -> {
+            m.setMessage("subFlow1");
+            return m;
+        }).channel("resultOfRouting");
+    }
+
+    @Bean
+    public IntegrationFlow subFlowB() {
         return f -> f.handle(Item.class, (m, p) -> {
             m.setMessage("subFlow2");
             try {
@@ -43,6 +49,6 @@ public class RouterExample {
                 m.setMessage("subFlow2WithExeception");
             }
             return m;
-        });
+        }).channel("resultOfRouting");
     }
 }
