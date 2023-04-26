@@ -13,13 +13,13 @@ import java.util.function.Consumer;
 @Configuration
 public class IntegrationStream {
 
-    @Bean
+ /*   @Bean
     public IntegrationFlow streamFlow() {
         return IntegrationFlows.from(ConsumerTest.class, gatewayProxySpec -> gatewayProxySpec.beanName("messageConsumerStream"))
                 .log(LoggingHandler.Level.WARN)
                 .handle(this::getMessageGenericHandler)
                 .get();
-    }
+    }*/
 
     private Message getMessageGenericHandler(Message message, Map<String, Object> headers) {
         System.out.println(message.getTest());
